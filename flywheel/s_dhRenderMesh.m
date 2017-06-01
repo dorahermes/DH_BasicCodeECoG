@@ -15,8 +15,8 @@ project = 'SOC ECoG (Hermes)';
 st.toolbox('project',project,'file','toolboxes.json');
 
 %% Find the analysis
-
+clear params
 params.filename = 'sub-19';
-st.runFunction('ecogRender.m','project',project,'params',params);
+st.runFunction('ecogRenderMesh.m','project',project,'params',params);
 
 %%

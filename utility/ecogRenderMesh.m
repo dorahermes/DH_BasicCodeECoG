@@ -1,7 +1,8 @@
-function g = ecogRenderGifti(varargin)
+function g = ecogRenderMesh(varargin)
 % Read a freesurfer pial obj file and render it as a gifti
 %
-% ecogRenderGifti;
+%
+% ecogRenderMesh;
 
 %%
 p = inputParser;
