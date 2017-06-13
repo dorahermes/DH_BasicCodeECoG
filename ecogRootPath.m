@@ -4,7 +4,7 @@ function rootPath = ecogRootPath()
 %        rootPath = ecogRootPath;
 %
 % This function MUST reside in the directory at the base of the
-% DH_BasicCodeECoG directory structure 
+% ecogBasicCode directory structure 
 %
 % Copyright Stanford team, mrVista, 2017
 
