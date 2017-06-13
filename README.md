@@ -1,1 +1,1 @@
-# DH_BasicCodeECoG
+# ecogBasicCode
