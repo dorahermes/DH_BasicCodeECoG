@@ -9,11 +9,9 @@ function ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames)
 %
 % DH 2017
 
-figure
-
 if ischar(cmapInput)
     eval(['cmap =' cmapInput '(max(vert_label));']);
-elseif isnumber(cmapInput)
+elseif isnumeric(cmapInput)
     cmap = cmapInput;
 end
 
