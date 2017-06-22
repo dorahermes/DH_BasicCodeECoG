@@ -50,6 +50,15 @@ orig = st.search('files',...
 fNameOrig = fullfile(workDir,'orig.mgz');
 st.get(orig{1},'destination',fNameOrig);
 
+% Get Wang and Kastner color labels for the mesh
+labels = st.search('files',...
+    'project label','SOC ECoG (Hermes)',...
+    'session label','sub-19',...
+    'acquisition label','anat',...
+    'file name','lh.wang2015_atlas.mgz');
+fNameLabel = fullfile(workDir,'lh.wang2015_atlas.mgz');
+st.get(labels{1},'destination',fNameLabel);
+
 % Figure out the transformation matrix from freesurfer to the T1 data
 % frame.
 origData = MRIread(fNameOrig);
@@ -77,8 +86,8 @@ vert_mat = vert_mat';
 g.vertices = vert_mat; 
 clear vert_mat
 
-%% Renders the brain and electrode
-
+%% Renders the brain and electrodes
+figure
 ecog_RenderGifti(g)
 
 % Set a good position for the viewer and the light 
@@ -88,6 +97,25 @@ ecog_ViewLight(270,0)
 ePositions = importdata(fnameElectrodes);
 elecMatrix = ePositions.data(:,2:4);
 ecog_Label(elecMatrix,10,20)
+
+%% Renders the brain with colors and electrodes 
+
+surface_labels = MRIread(fNameLabel);
+vert_label = surface_labels.vol(:);
+
+cmap = 'lines';
+% cmap = lines(max(vert_label));
+Wang_ROI_Names = {...
+    'V1v' 'V1d' 'V2v' 'V2d' 'V3v' 'V3d' 'hV4' 'VO1' 'VO2' 'PHC1' 'PHC2' ...
+    'TO2' 'TO1' 'LO2' 'LO1' 'V3B' 'V3A' 'IPS0' 'IPS1' 'IPS2' 'IPS3' 'IPS4' ...
+    'IPS5' 'SPL1' 'FEF'};
+
+fid = figure;
+
+ecog_RenderGiftiLabels(g,vert_label,cmap,Wang_ROI_Names)
+el_add(elecMatrix,'k',30)
+el_add(elecMatrix,[.9 .9 .9],20)
+
 
 %%
 
