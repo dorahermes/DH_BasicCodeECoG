@@ -1,3 +1,8 @@
 local
 *~
 
+# Do not safe matlab backup scripts 
+.m~
+
+# Do not safe data files
+.mat
