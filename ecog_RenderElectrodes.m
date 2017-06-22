@@ -11,14 +11,17 @@ function val = ecog_RenderElectrodes(varargin)
 val = [];
 
 %%  Open up the object to vistalab
+
 st = scitran('vistalab','verify',true);
-chdir(fullfile(ecogRootPath,'local'));
-workDir = pwd;
 
 %% Argument checking and toolbox checking
 
 project = 'SOC ECoG (Hermes)';
 st.toolbox('project',project,'file','toolboxes.json');
+
+%%
+chdir(fullfile(ecogRootPath,'local'));
+workDir = pwd;
 
 %% Identify
 
