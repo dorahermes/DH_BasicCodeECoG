@@ -1,17 +1,14 @@
-function ecog_RenderElectrodes()
-% Download pial surface from FreeSurfer and overlay electrodes for
-% visualization
-%
+function val = ecog_RenderElectrodes(varargin)
+% Overlay electrodes on a brain mesh from FreeSurfer
 % 
-% DH/BW Vistasoft Team, 2017
-%
 % Repositories needed
 %   vistasoft
 %   ecogBasicCode 
 %
-% TODO:
-%    Try to use objRead and objWrite for now.
-%    We may end up deleting read_obj() from vistasoft in the end
+% DH/BW Vistasoft Team, 2017
+
+%%
+val = [];
 
 %%  Open up the object to vistalab
 st = scitran('vistalab','verify',true);
@@ -20,12 +17,14 @@ workDir = pwd;
 
 %% Argument checking and toolbox checking
 
+project = 'SOC ECoG (Hermes)';
+st.toolbox('project',project,'file','toolboxes.json');
 
 %% Identify
 
 % Get the electrode positions
 electrodePositions = st.search('files',...
-    'project label','SOC ECoG (Hermes)',...
+    'project label',project,...
     'session label','sub-19',...
     'file name','sub-19_loc.tsv');
 fnameElectrodes = fullfile(workDir,'sub-19_loc.tsv');
@@ -55,13 +54,11 @@ Torig    = origData.tkrvox2ras;
 Norig    = origData.vox2ras;
 freeSurfer2T1 = Norig/Torig;  % Norig * inv(Torig);s
 
-%%
+%%  Build the brain surface
 
 % Read the pial surface
 [vertex,face] = read_obj(fNamePial);
-% Not working properly.
-% We should check
-% OBJ = objRead(fNamePial);
+% We should check this OBJ reader - OBJ = objRead(fNamePial);
 
 % convert vertices to original space
 g.vertices = vertex';
@@ -77,7 +74,8 @@ vert_mat = vert_mat';
 g.vertices = vert_mat; 
 clear vert_mat
 
-% Renders the brain
+%% Renders the brain and electrode
+
 ecog_RenderGifti(g)
 
 % Set a good position for the viewer and the light 
@@ -88,18 +86,5 @@ ePositions = importdata(fnameElectrodes);
 elecMatrix = ePositions.data(:,2:4);
 ecog_Label(elecMatrix,10,20)
 
-%% save as a gifti
-
-% gifti_name = [bids_rootpath 'sub-' subj '/anat/sub-' subj '_T1w_pial.L.surf.gii'];
-% 
-% save(g,gifti_name,'Base64Binary')
-
-
-%% TODO
-
-% obj to gifti
-% gifti to obj
-% include color 
- 
-% make a function for surf2native_coordinates;
+%%
 
