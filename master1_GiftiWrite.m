@@ -22,12 +22,17 @@ g = gifti(g);
 % get tranformation matrix from freesurfer surfaces to original T1 space:
 % either of these work for flywheel case, in other cases, make sure to
 % select the orig.mgz
+% mri_orig = ([bids_rootpath '/sub-19/derivatives/RetinotopyTemplates/rt_sub000/mri/orig.mgz']);
+% [status,Torig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras-tkr ' mri_orig]);
+% Torig = str2num(Torig);
+% [status,Norig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras ' mri_orig]);
+% Norig = str2num(Norig);
+% freeSurfer2T1 = Norig*inv(Torig);
+
 mri_orig = ([bids_rootpath '/sub-19/derivatives/RetinotopyTemplates/rt_sub000/mri/orig.mgz']);
-% mri_orig = [bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/T1.nii.gz'];
-[status,Torig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras-tkr ' mri_orig]);
-Torig = str2num(Torig);
-[status,Norig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras ' mri_orig]);
-Norig = str2num(Norig);
+orig = MRIread(mri_orig);
+Torig = orig.tkrvox2ras;
+Norig = orig.vox2ras;
 freeSurfer2T1 = Norig*inv(Torig);
 
 % convert vertices to original space
@@ -47,7 +52,5 @@ save(g,gifti_name,'Base64Binary')
 
 obj to gifti
 gifti to obj
-include color 
- 
-make a function for surf2native_coordinates;
+include color  
 
