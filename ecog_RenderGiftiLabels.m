@@ -35,7 +35,7 @@ set(l1,'Position',[-1 0 1])
 
 if ~isempty(roiNames)
     subplot(1,5,5),hold on
-    if ischar(roiNames)
+    if iscell(roiNames)
         for k = 1:length(roiNames)
             plot(1,k,'.','Color',cmap(k,:),'MarkerSize',30)
             text(1.03,k,roiNames{k},'Color',cmap(k,:),'VerticalAlignment','middle')

@@ -5,18 +5,25 @@ subj = '19';
 
 %% load freesurfer Benson Atlas output and save as gifti in original coordinates
 
+% OBJ file (in flywheel)
 [vertex,face] = read_obj([bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/lh.pial.obj']);
-% if still a freesurfer surf file this can be converted to gifti with:
-%   mri_convert lh.pial lh.pial.gii
-% the following conversion to original space always has to happen!
 
 g.vertices = vertex';
 g.faces = face';
 g.mat = eye(4,4);
 g = gifti(g);
 
+% GIFTI file
+% if still a freesurfer surf file this can be converted to gifti with:
+%   mris_convert lh.pial lh.pial.gii
+
+% the following conversion to original space always has to happen!
+
 % get tranformation matrix from freesurfer surfaces to original T1 space:
-mri_orig = [bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/T1.nii.gz'];
+% either of these work for flywheel case, in other cases, make sure to
+% select the orig.mgz
+mri_orig = ([bids_rootpath '/sub-19/derivatives/RetinotopyTemplates/rt_sub000/mri/orig.mgz']);
+% mri_orig = [bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/T1.nii.gz'];
 [status,Torig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras-tkr ' mri_orig]);
 Torig = str2num(Torig);
 [status,Norig]  = system(['/Applications/freesurfer/bin/mri_info --vox2ras ' mri_orig]);
@@ -35,4 +42,12 @@ gifti_name = [bids_rootpath 'sub-' subj '/anat/sub-' subj '_T1w_pial.L.surf.gii'
 
 save(g,gifti_name,'Base64Binary')
 
+
+%% TODO
+
+obj to gifti
+gifti to obj
+include color 
+ 
+make a function for surf2native_coordinates;
 
