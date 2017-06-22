@@ -1,4 +1,5 @@
 *~
+.DS_Store
 
 # Do not safe matlab backup scripts 
 .m~
