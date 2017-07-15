@@ -1,4 +1,4 @@
-function val = ecog_RenderElectrodesMovie(views,varargin)
+function val = ecog_RenderElectrodesMovie(varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
 % and make a movie
 %
@@ -8,8 +8,9 @@ function val = ecog_RenderElectrodesMovie(views,varargin)
 %   
 %
 % Example
-%   views = [-89:1:90; -10*ones(1,180)]'  
-%   ecog_RenderElectrodesMovie(views);
+%   views = [-89:1:90; -10*ones(1,180)]';
+%   params.views = views;
+%   ecog_RenderElectrodesMovie(params);
 %
 % Repositories needed
 %   vistasoft
@@ -20,12 +21,14 @@ function val = ecog_RenderElectrodesMovie(views,varargin)
 %%
 
 p = inputParser;
-p.addRequired('views',@(x)(size(x,2) == 2));
+p.addParameter('views',[],@(x)(size(x,2) == 2));
 p.addParameter('subjectCode','sub-19',@ischar);
 
-p.parse(views,varargin{:});
+p.parse(varargin{:});
+
 subjectCode = p.Results.subjectCode;
 views = p.Results.views;
+if isempty(views), error('No views defined.'); end
 
 %%
 val = [];
