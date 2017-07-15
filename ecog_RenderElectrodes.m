@@ -1,14 +1,28 @@
 function val = ecog_RenderElectrodes(varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
 % 
+%   ecog_RenderElectrodes('subjectCode',...)
+%
+% params.subjectCode = 'sub-19';
+% ecogRenderElectrodes(params);
+%
 % Repositories needed
 %   vistasoft
 %   ecogBasicCode 
 %
+% Examples
+%   ecog_RenderElectrodes;
+%
+% 
 % DH/BW Vistasoft Team, 2017
 
 %%
 val = [];
+
+p = inputParser;
+p.addParameter('subjectCode','sub-19',@ischar);
+p.parse(varargin{:});
+subjectCode = p.Results.subjectCode;
 
 %%  Open up the object to vistalab
 
@@ -24,19 +38,19 @@ chdir(fullfile(ecogRootPath,'local'));
 workDir = pwd;
 
 %% Identify
-
+filename = sprintf('%s_loc.tsv',subjectCode);
 % Get the electrode positions
 electrodePositions = st.search('files',...
     'project label',project,...
-    'session label','sub-19',...
-    'file name','sub-19_loc.tsv');
-fnameElectrodes = fullfile(workDir,'sub-19_loc.tsv');
+    'subject code',subjectCode,...
+    'file name',filename);
+fnameElectrodes = fullfile(workDir,filename);
 st.get(electrodePositions{1},'destination',fnameElectrodes);
 
 % Get the pial surface from the anatomical
 lhPial = st.search('files in analysis',...
     'project label','SOC ECoG (Hermes)',...
-    'session label','sub-19',...
+    'subject code',subjectCode,...
     'file name','rt_sub000_lh.pial.obj');
 fNamePial = fullfile(workDir,'lhPial.obj');
 st.get(lhPial{1},'destination',fNamePial);
@@ -44,7 +58,7 @@ st.get(lhPial{1},'destination',fNamePial);
 % Get information relating the T1 and FreeSurfer coordinates
 orig = st.search('files',...
     'project label','SOC ECoG (Hermes)',...
-    'session label','sub-19',...
+    'subject code',subjectCode,...
     'acquisition label','anat',...
     'file name','orig.mgz');
 fNameOrig = fullfile(workDir,'orig.mgz');
