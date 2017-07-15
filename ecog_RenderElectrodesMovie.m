@@ -1,11 +1,15 @@
-function val = ecog_RenderElectrodesMovie(varargin)
+function val = ecog_RenderElectrodesMovie(views,varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
 % and make a movie
 %
-% val = ecog_RenderElectrodesMovie(views)
+% val = ecog_RenderElectrodesMovie(views,varargin)
 %
 % inputs: views: viewing angles to loop through
-%   for example views = [-89:1:90; -10*ones(1,180)]'  
+%   
+%
+% Example
+%   views = [-89:1:90; -10*ones(1,180)]'  
+%   ecog_RenderElectrodesMovie(views);
 %
 % Repositories needed
 %   vistasoft
@@ -15,15 +19,13 @@ function val = ecog_RenderElectrodesMovie(varargin)
 % DH/BW Vistasoft Team, 2017
 %%
 
-if ~isempty(varargin)
-    if isfield(varargin{1},'views')
-        views = varargin{1}.views;
-    else
-        views = varargin{1};
-    end
-else
-    error('views missing: viewing angles to loop through')
-end
+p = inputParser;
+p.addRequired('views',@(x)(size(x,2) == 2));
+p.addParameter('subjectCode','sub-19',@ischar);
+
+p.parse(views,varargin{:});
+subjectCode = p.Results.subjectCode;
+views = p.Results.views;
 
 %%
 val = [];
@@ -44,17 +46,18 @@ workDir = pwd;
 %% Identify
 
 % Get the electrode positions
+filename = sprintf('%s_loc.tsv',subjectCode);
 electrodePositions = st.search('files',...
     'project label',project,...
-    'session label','sub-19',...
-    'file name','sub-19_loc.tsv');
-fnameElectrodes = fullfile(workDir,'sub-19_loc.tsv');
+    'subject code',subjectCode,...
+    'file name',filename);
+fnameElectrodes = fullfile(workDir,filename);
 st.get(electrodePositions{1},'destination',fnameElectrodes);
 
 % Get the pial surface from the anatomical
 lhPial = st.search('files in analysis',...
     'project label','SOC ECoG (Hermes)',...
-    'session label','sub-19',...
+    'subject code',subjectCode,...
     'file name','rt_sub000_lh.pial.obj');
 fNamePial = fullfile(workDir,'lhPial.obj');
 st.get(lhPial{1},'destination',fNamePial);
@@ -62,7 +65,7 @@ st.get(lhPial{1},'destination',fNamePial);
 % Get information relating the T1 and FreeSurfer coordinates
 orig = st.search('files',...
     'project label','SOC ECoG (Hermes)',...
-    'session label','sub-19',...
+    'subject code',subjectCode,...
     'acquisition label','anat',...
     'file name','orig.mgz');
 fNameOrig = fullfile(workDir,'orig.mgz');
@@ -71,7 +74,7 @@ st.get(orig{1},'destination',fNameOrig);
 % Get Wang and Kastner color labels for the mesh
 labels = st.search('files',...
     'project label','SOC ECoG (Hermes)',...
-    'session label','sub-19',...
+    'subject code',subjectCode,...
     'acquisition label','anat',...
     'file name','lh.wang2015_atlas.mgz');
 fNameLabel = fullfile(workDir,'lh.wang2015_atlas.mgz');
