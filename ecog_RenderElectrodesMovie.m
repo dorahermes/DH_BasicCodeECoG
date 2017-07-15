@@ -1,28 +1,32 @@
-function val = ecog_RenderElectrodes(varargin)
+function val = ecog_RenderElectrodesMovie(varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
-% 
-%   ecog_RenderElectrodes('subjectCode',...)
+% and make a movie
 %
-% params.subjectCode = 'sub-19';
-% ecogRenderElectrodes(params);
+% val = ecog_RenderElectrodesMovie(views)
+%
+% inputs: views: viewing angles to loop through
+%   for example views = [-89:1:90; -10*ones(1,180)]'  
 %
 % Repositories needed
 %   vistasoft
-%   ecogBasicCode 
+%   ecogBasicCode
+%   scitran
 %
-% Examples
-%   ecog_RenderElectrodes;
-%
-% 
 % DH/BW Vistasoft Team, 2017
+%%
+
+if ~isempty(varargin)
+    if isfield(varargin{1},'views')
+        views = varargin{1}.views;
+    else
+        views = varargin{1};
+    end
+else
+    error('views missing: viewing angles to loop through')
+end
 
 %%
 val = [];
-
-p = inputParser;
-p.addParameter('subjectCode','sub-19',@ischar);
-p.parse(varargin{:});
-subjectCode = p.Results.subjectCode;
 
 %%  Open up the object to vistalab
 
@@ -38,19 +42,19 @@ chdir(fullfile(ecogRootPath,'local'));
 workDir = pwd;
 
 %% Identify
-filename = sprintf('%s_loc.tsv',subjectCode);
+
 % Get the electrode positions
 electrodePositions = st.search('files',...
     'project label',project,...
-    'subject code',subjectCode,...
-    'file name',filename);
-fnameElectrodes = fullfile(workDir,filename);
+    'session label','sub-19',...
+    'file name','sub-19_loc.tsv');
+fnameElectrodes = fullfile(workDir,'sub-19_loc.tsv');
 st.get(electrodePositions{1},'destination',fnameElectrodes);
 
 % Get the pial surface from the anatomical
 lhPial = st.search('files in analysis',...
     'project label','SOC ECoG (Hermes)',...
-    'subject code',subjectCode,...
+    'session label','sub-19',...
     'file name','rt_sub000_lh.pial.obj');
 fNamePial = fullfile(workDir,'lhPial.obj');
 st.get(lhPial{1},'destination',fNamePial);
@@ -58,7 +62,7 @@ st.get(lhPial{1},'destination',fNamePial);
 % Get information relating the T1 and FreeSurfer coordinates
 orig = st.search('files',...
     'project label','SOC ECoG (Hermes)',...
-    'subject code',subjectCode,...
+    'session label','sub-19',...
     'acquisition label','anat',...
     'file name','orig.mgz');
 fNameOrig = fullfile(workDir,'orig.mgz');
@@ -78,7 +82,7 @@ st.get(labels{1},'destination',fNameLabel);
 origData = MRIread(fNameOrig);
 Torig    = origData.tkrvox2ras;
 Norig    = origData.vox2ras;
-freeSurfer2T1 = Norig/Torig;  % Norig * inv(Torig);s
+freeSurfer2T1 = Norig/Torig;  % = Norig * inv(Torig);
 
 %%  Build the brain surface
 
@@ -100,20 +104,13 @@ vert_mat = vert_mat';
 g.vertices = vert_mat; 
 clear vert_mat
 
-%% Renders the brain and electrodes
-figure
-ecog_RenderGifti(g)
-
-% Set a good position for the viewer and the light 
-ecog_ViewLight(270,0)
-
-% Load and add electrode positions
-ePositions = importdata(fnameElectrodes);
-elecMatrix = ePositions.data(:,2:4);
-ecog_Label(elecMatrix,10,20)
-
 %% Renders the brain with colors and electrodes 
 
+% Import electrode positions
+ePositions = importdata(fnameElectrodes);
+elecMatrix = ePositions.data(:,2:4);
+
+% Read surface labels
 surface_labels = MRIread(fNameLabel);
 vert_label = surface_labels.vol(:);
 
@@ -130,6 +127,31 @@ ecog_RenderGiftiLabels(g,vert_label,cmap,Wang_ROI_Names)
 el_add(elecMatrix,'k',30)
 el_add(elecMatrix,[.9 .9 .9],20)
 
+%%
+
+videoname = fullfile(workDir,'wang2015_atlas_electrodes_movie'); 
+
+vidObj = VideoWriter(videoname,'MPEG-4'); %
+
+open(vidObj); 
+
+views_play = views;
+
+for k = 1:size(views_play,1)
+    if mod(k,10)==0;
+        disp(['frame ' int2str(k)])
+    end
+
+    ecog_ViewLight(views_play(k,1),views_play(k,2))
+
+    % Write each frame to the file.
+    for m=1:3 % write X frames: decides speed
+        writeVideo(vidObj,getframe(fid));
+    end
+    
+end
+
+close(vidObj);
 
 %%
 

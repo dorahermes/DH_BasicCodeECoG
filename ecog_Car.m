@@ -15,24 +15,27 @@ function [signalOut,spatfiltmatrix] = ecog_Car(signal, chans2incl)
 %
 % DH 2010
 
-
+if size(signal,1) < size(signal,2) % signal samples X electrodes
+    disp('transpose signal to be samples X electrodes')
+    return
+end
 
 num_chans = length(chans2incl);
 
 % spatfiltmatrix=[];
 % create a CAR spatial filter
 spatfiltmatrix=-1/num_chans*ones(size(signal,2)); % ischanged
-for i=1:length(signal(1,:))
-    spatfiltmatrix(i, i)=1-1/num_chans;% was num_chans-1;
+for k = 1:size(signal,2)
+    spatfiltmatrix(k,k)=1-1/num_chans;% was num_chans-1;
 end
 
 % start exclude channels
 % signalOut1=double(signal)*spatfiltmatrix;
-for i=1:length(signal(1,:))
-    if ismember(i,chans2incl)==0
-        spatfiltmatrix(i,:)=0;
-        spatfiltmatrix(:,i)=0;
-        spatfiltmatrix(i,i)=1;
+for k = 1:size(signal,2)
+    if ismember(k,chans2incl)==0
+        spatfiltmatrix(k,:)=0;
+        spatfiltmatrix(:,k)=0;
+        spatfiltmatrix(k,k)=1;
     end
 end
 % end exclude channels
