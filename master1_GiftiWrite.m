@@ -1,12 +1,14 @@
 
 
 bids_rootpath = '/Volumes/DoraBigDrive/data/visual_soc/soc_bids/';
-subj = '19';
+subj = '09';
+hemi_sm='r';
+hemi_cap='R';
 
 %% load freesurfer Benson Atlas output and save as gifti in original coordinates
 
 % OBJ file (in flywheel)
-[vertex,face] = read_obj([bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/lh.pial.obj']);
+[vertex,face] = read_obj([bids_rootpath '/sub-' subj '/derivatives/RetinotopyTemplates/' hemi_sm 'h.pial.obj']);
 
 g.vertices = vertex';
 g.faces = face';
@@ -29,7 +31,7 @@ g = gifti(g);
 % Norig = str2num(Norig);
 % freeSurfer2T1 = Norig*inv(Torig);
 
-mri_orig = ([bids_rootpath '/sub-19/derivatives/RetinotopyTemplates/rt_sub000/mri/orig.mgz']);
+mri_orig = ([bids_rootpath 'sub-' subj '/derivatives/RetinotopyTemplates/rt_sub-' subj '/mri/orig.mgz']);
 orig = MRIread(mri_orig);
 Torig = orig.tkrvox2ras;
 Norig = orig.vox2ras;
@@ -43,7 +45,7 @@ vert_mat = vert_mat';
 g.vertices = vert_mat; clear vert_mat
 
 %% save as a gifti
-gifti_name = [bids_rootpath 'sub-' subj '/anat/sub-' subj '_T1w_pial.L.surf.gii'];
+gifti_name = [bids_rootpath 'sub-' subj '/anat/sub-' subj '_T1w_pial.' hemi_cap '.surf.gii'];
 
 save(g,gifti_name,'Base64Binary')
 

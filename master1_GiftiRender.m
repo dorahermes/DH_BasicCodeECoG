@@ -64,6 +64,11 @@ ecog_RenderGiftiLabels(g,vert_label,cmap,Wang_ROI_Names)
 el_add(elecmatrix,'k',30)
 el_add(elecmatrix,[.9 .9 .9],20)
 
+ecog_ViewLight(-89,-10)
+
+set(gcf,'PaperPositionMode','auto')
+print('-dpng','-r300',['./local/sub-' subj '_render_v-89-10'])
+
 
 
 %% write a video
