@@ -1,57 +1,85 @@
 function val = ecog_RenderElectrodes(varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
 % 
+% Syntax
 %   ecog_RenderElectrodes(...)
 %
+% Description
+%
+% Inputs (required)
+%  None
+%
+% Inputs (optional)
+%   subjectCode
+%
+% Return
+%   
 %
 % Repositories needed
 %   vistasoft
 %   ecogBasicCode 
 %
-% Examples
-%   ecog_RenderElectrodes;
+% Examples in code
 %
-% 
 % DH/BW Vistasoft Team, 2017
+%
+% See also scitran.runFunction, 
 
 % st = scitran('vistalab');
-% Example 1 - 
-%{
- % When Flywheel downloads this, it is local_ecog_RenderElectrodes
- clear params
- params.subjectCode = 'sub-19';
- local_ecog_RenderElectrodes(params);
-%}
-% Example 2 - Upload this file
+% Upload this file
 %{
  thisFile = which('ecog_RenderElectrodes.m');
  project = 'SOC ECoG (Hermes)';
  [s,id] = st.exist('project',project);
  st.upload(thisFile,'project',id);
 %}
-%% 
-val = [];
 
+% Example 1 - 
+%{
+ % Run the local version
+ clear params
+ params.subjectCode = 'sub-19';
+ ecog_RenderElectrodes(params);
+%}
+% Example 2 -
+%{
+ % Flywheel downloads and runs local_ecog_RenderElectrodes
+ clear params
+ params.subjectCode = 'sub-19';
+ [s,id] = st.exist('project','SOC ECoG (Hermes)');
+ mFile = 'ecog_RenderElectrodes.m';
+ if s, st.runFunction(mFile,'container type','project','container ID',id); end
+%}
+
+%% 
 p = inputParser;
 
 p.addParameter('subjectCode','sub-19',@ischar);
+
 p.parse(varargin{:});
 
 subjectCode = p.Results.subjectCode;
+
+val = [];  % Placeholder.  Not used.
 
 %%  Open up the object to vistalab
 
 st = scitran('vistalab');
 
-%% Argument checking and toolbox checking
-
 project = 'SOC ECoG (Hermes)';
 
-% With install set to false, we are only testing whether the toolboxes are
-% on the path
-st.toolbox('SOC-ECoG-toolboxes.json',...
-    'project',project,...
-    'install',false);
+% Check that the required toolboxes are on the path
+[~,valid] = st.getToolbox('SOC-ECoG-toolboxes.json',...
+    'project name',project,...
+    'validate',true);
+
+if ~valid
+    error('Please install the SOC-ECoG-toolboxes.json toolboxes on your path'); 
+    % We could do this
+    %     st.toolbox('SOC-ECoG-toolboxes.json',...
+    %     'project',project,...
+    %     'install',true);
+end
 
 %%
 chdir(fullfile(ecogRootPath,'local'));
@@ -113,6 +141,8 @@ g.vertices = vert_mat;
 clear vert_mat
 
 %% Renders the brain and electrode
+
+stNewGraphWin;
 
 ecog_RenderGifti(g)
 
