@@ -1,37 +1,85 @@
 function val = ecog_RenderElectrodes(varargin)
 % Overlay electrodes on a brain mesh from FreeSurfer
 % 
-%   ecog_RenderElectrodes('subjectCode',...)
+% Syntax
+%   ecog_RenderElectrodes(...)
 %
-% params.subjectCode = 'sub-19';
-% ecogRenderElectrodes(params);
+% Description
+%
+% Inputs (required)
+%  None
+%
+% Inputs (optional)
+%   subjectCode
+%
+% Return
+%   
 %
 % Repositories needed
 %   vistasoft
 %   ecogBasicCode 
 %
-% Examples
-%   ecog_RenderElectrodes;
+% Examples in code
 %
-% 
 % DH/BW Vistasoft Team, 2017
+%
+% See also scitran.runFunction, 
 
-%%
-val = [];
+% st = scitran('vistalab');
+% Upload this file
+%{
+ thisFile = which('ecog_RenderElectrodes.m');
+ project = 'SOC ECoG (Hermes)';
+ [s,id] = st.exist('project',project);
+ st.upload(thisFile,'project',id);
+%}
 
+% Example 1 - 
+%{
+ % Run the local version
+ clear params
+ params.subjectCode = 'sub-19';
+ ecog_RenderElectrodes(params);
+%}
+% Example 2 -
+%{
+ % Flywheel downloads and runs local_ecog_RenderElectrodes
+ clear params
+ params.subjectCode = 'sub-19';
+ [s,id] = st.exist('project','SOC ECoG (Hermes)');
+ mFile = 'ecog_RenderElectrodes.m';
+ if s, st.runFunction(mFile,'container type','project','container ID',id); end
+%}
+
+%% 
 p = inputParser;
+
 p.addParameter('subjectCode','sub-19',@ischar);
+
 p.parse(varargin{:});
+
 subjectCode = p.Results.subjectCode;
+
+val = [];  % Placeholder.  Not used.
 
 %%  Open up the object to vistalab
 
-st = scitran('vistalab','verify',true);
-
-%% Argument checking and toolbox checking
+st = scitran('vistalab');
 
 project = 'SOC ECoG (Hermes)';
-st.toolbox('project',project,'file','toolboxes.json');
+
+% Check that the required toolboxes are on the path
+[~,valid] = st.getToolbox('SOC-ECoG-toolboxes.json',...
+    'project name',project,...
+    'validate',true);
+
+if ~valid
+    error('Please install the SOC-ECoG-toolboxes.json toolboxes on your path'); 
+    % We could do this
+    %     st.toolbox('SOC-ECoG-toolboxes.json',...
+    %     'project',project,...
+    %     'install',true);
+end
 
 %%
 chdir(fullfile(ecogRootPath,'local'));
@@ -39,39 +87,31 @@ workDir = pwd;
 
 %% Identify
 filename = sprintf('%s_loc.tsv',subjectCode);
+
 % Get the electrode positions
-electrodePositions = st.search('files',...
-    'project label',project,...
+electrodePositions = st.search('file',...
+    'project label exact',project,...
     'subject code',subjectCode,...
     'file name',filename);
 fnameElectrodes = fullfile(workDir,filename);
-st.get(electrodePositions{1},'destination',fnameElectrodes);
+st.downloadFile(electrodePositions{1},'destination',fnameElectrodes);
 
 % Get the pial surface from the anatomical
-lhPial = st.search('files in analysis',...
-    'project label','SOC ECoG (Hermes)',...
+lhPial = st.search('file',...
+    'project label exact',project,...
     'subject code',subjectCode,...
     'file name','rt_sub000_lh.pial.obj');
 fNamePial = fullfile(workDir,'lhPial.obj');
-st.get(lhPial{1},'destination',fNamePial);
+st.downloadFile(lhPial{1},'destination',fNamePial);
 
 % Get information relating the T1 and FreeSurfer coordinates
-orig = st.search('files',...
-    'project label','SOC ECoG (Hermes)',...
+orig = st.search('file',...
+    'project label exact',project,...
     'subject code',subjectCode,...
-    'acquisition label','anat',...
+    'acquisition label exact','anat',...
     'file name','orig.mgz');
 fNameOrig = fullfile(workDir,'orig.mgz');
-st.get(orig{1},'destination',fNameOrig);
-
-% Get Wang and Kastner color labels for the mesh
-labels = st.search('files',...
-    'project label','SOC ECoG (Hermes)',...
-    'subject code',subjectCode,...
-    'acquisition label','anat',...
-    'file name','lh.wang2015_atlas.mgz');
-fNameLabel = fullfile(workDir,'lh.wang2015_atlas.mgz');
-st.get(labels{1},'destination',fNameLabel);
+st.downloadFile(orig{1},'destination',fNameOrig);
 
 % Figure out the transformation matrix from freesurfer to the T1 data
 % frame.
@@ -100,8 +140,10 @@ vert_mat = vert_mat';
 g.vertices = vert_mat; 
 clear vert_mat
 
-%% Renders the brain and electrodes
-figure
+%% Renders the brain and electrode
+
+stNewGraphWin;
+
 ecog_RenderGifti(g)
 
 % Set a good position for the viewer and the light 
@@ -111,25 +153,6 @@ ecog_ViewLight(270,0)
 ePositions = importdata(fnameElectrodes);
 elecMatrix = ePositions.data(:,2:4);
 ecog_Label(elecMatrix,10,20)
-
-%% Renders the brain with colors and electrodes 
-
-surface_labels = MRIread(fNameLabel);
-vert_label = surface_labels.vol(:);
-
-cmap = 'lines';
-% cmap = lines(max(vert_label));
-Wang_ROI_Names = {...
-    'V1v' 'V1d' 'V2v' 'V2d' 'V3v' 'V3d' 'hV4' 'VO1' 'VO2' 'PHC1' 'PHC2' ...
-    'TO2' 'TO1' 'LO2' 'LO1' 'V3B' 'V3A' 'IPS0' 'IPS1' 'IPS2' 'IPS3' 'IPS4' ...
-    'IPS5' 'SPL1' 'FEF'};
-
-fid = figure;
-
-ecog_RenderGiftiLabels(g,vert_label,cmap,Wang_ROI_Names)
-el_add(elecMatrix,'k',30)
-el_add(elecMatrix,[.9 .9 .9],20)
-
 
 %%
 
