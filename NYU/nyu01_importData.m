@@ -95,9 +95,11 @@ end
 % You can also notch filter at 100 and then take hband = 60:120
 %%
 
-figure,
-el = 46;
-plot(data.time{1},smooth(hband_sig(el,:),128));
+figure,hold on
+el = 45;
+plot(data.time{1},smooth(hband_sig(el,:),64));
+% load onsets
+plot(onsets.soc,0,'r.')
 
 % and plot event onsets on top
 
