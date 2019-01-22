@@ -19,7 +19,7 @@ end
 c = 0.7+zeros(size(vert_label,1),3);
 
 for k = 1:max(vert_label)
-    c(round(vert_label)==k,:)=repmat(cmap(k,:),length(find(round(vert_label)==k)),1);
+    c(ceil(vert_label)==k,:) = repmat(cmap(k,:),length(find(ceil(vert_label)==k)),1);
 end
 
 subplot(1,5,1:4)
