@@ -1,4 +1,4 @@
-function ecog_RenderGifti(g)
+function tH = ecog_RenderGifti(g)
 % function to render a gifti 
 % 
 % input:

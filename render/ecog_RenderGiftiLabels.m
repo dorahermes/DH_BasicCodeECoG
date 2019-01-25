@@ -1,8 +1,12 @@
-function ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames)
+function tH = ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames)
 % function to render a gifti 
 % 
 % input:
 %   g: gifti file with faces and vertices
+%
+% output:
+%   th: returns trimesh handle so you can change it
+%       for example, tH.FaceAlpha = 0.5 will make the rendering transparent 
 %
 % Viewing Angle: can be changed with ecog_ViewLight(90,0), changes both
 % angle and light accordingly
