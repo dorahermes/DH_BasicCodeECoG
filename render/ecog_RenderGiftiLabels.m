@@ -37,24 +37,26 @@ set(gcf,'Renderer', 'zbuffer')
 view(270, 0);
 set(l1,'Position',[-1 0 1])
 
-if ~isempty(roiNames)
-    subplot(1,5,5),hold on
-    if iscell(roiNames)
-        for k = 1:length(roiNames)
-            plot(1,k,'.','Color',cmap(k,:),'MarkerSize',30)
-            text(1.03,k,roiNames{k},'Color',cmap(k,:),'VerticalAlignment','middle')
+if exist('roiNames','var')
+    if ~isempty(roiNames)
+        subplot(1,5,5),hold on
+        if iscell(roiNames)
+            for k = 1:length(roiNames)
+                plot(1,k,'.','Color',cmap(k,:),'MarkerSize',30)
+                text(1.03,k,roiNames{k},'Color',cmap(k,:),'VerticalAlignment','middle')
+            end
+        elseif isnumeric(roiNames)
+            for k = 1:length(roiNames)
+                plot(1,k,'.','Color',cmap(k,:),'MarkerSize',20)
+            end
+            % if numbers text at bottom, middle and top
+            text(1.03,1,int2str(roiNames(1)),'Color',[0 0 0],'VerticalAlignment','middle')
+            text(1.03,round(length(roiNames)/2),int2str(roiNames(round(length(roiNames)/2))),'Color',[0 0 0],'VerticalAlignment','middle')
+            text(1.03,length(roiNames),int2str(roiNames(end)),'Color',[0 0 0],'VerticalAlignment','middle')
         end
-    elseif isnumeric(roiNames)
-        for k = 1:length(roiNames)
-            plot(1,k,'.','Color',cmap(k,:),'MarkerSize',20)
-        end
-        % if numbers text at bottom, middle and top
-        text(1.03,1,int2str(roiNames(1)),'Color',[0 0 0],'VerticalAlignment','middle')
-        text(1.03,round(length(roiNames)/2),int2str(roiNames(round(length(roiNames)/2))),'Color',[0 0 0],'VerticalAlignment','middle')
-        text(1.03,length(roiNames),int2str(roiNames(end)),'Color',[0 0 0],'VerticalAlignment','middle')
+        xlim([0.8 1.2]),ylim([0 length(roiNames)+1])
+        axis off
     end
-    xlim([0.8 1.2]),ylim([0 length(roiNames)+1])
-    axis off
 end
 
 subplot(1,5,1:4)
