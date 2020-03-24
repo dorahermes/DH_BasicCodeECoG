@@ -87,7 +87,7 @@ print('-dpng','-r300',['./local/sub-' subj '_render_v-89-10'])
 %     end
 % 
 %     ecog_ViewLight(views_play(k,1),views_play(k,2))
-%
+% 
 %     % Write each frame to the file.
 %     for m=1:3 % write X frames
 %         writeVideo(vidObj,getframe(fid));

@@ -1,8 +1,12 @@
-function tH = ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames)
+function tH = ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames,varargin)
 % function to render a gifti 
 % 
 % input:
-%   g: gifti file with faces and vertices
+%     g: gifti file with faces and vertices
+%     vert_label
+%     cmapInput
+%     roiNames
+%     varargin{1}: sulcal_map
 %
 % output:
 %   th: returns trimesh handle so you can change it
@@ -20,7 +24,13 @@ elseif isnumeric(cmapInput)
 end
 
 % convert surface labels into colors for vertices in mesh (c)
-c = 0.7+zeros(size(vert_label,1),3);
+if isempty(varargin)
+    c = 0.7+zeros(size(vert_label,1),3);
+elseif ~isempty(varargin)
+    sulcal_labels = varargin{1};
+    c = 0.5+zeros(size(vert_label,1),3);
+    c(sulcal_labels<0,:) = 0.7;
+end
 
 for k = 1:max(vert_label)
     c(ceil(vert_label)==k,:) = repmat(cmap(k,:),length(find(ceil(vert_label)==k)),1);

@@ -4,8 +4,8 @@
 
 % always select all channels, otherwise numbers will not be correct
 % data: data should be channels X time
-srate=1525.88; % sampling rate
+srate = 512; % sampling rate
 figure;
-spectopo(data,length(data(1,:)), srate);
+spectopo(data(1:90,:),length(data(1,:)), srate);
 
 
