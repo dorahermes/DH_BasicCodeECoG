@@ -6,7 +6,7 @@ function tH = ecog_RenderGiftiLabels(g,vert_label,cmapInput,roiNames,varargin)
 %     vert_label
 %     cmapInput
 %     roiNames
-%     varargin{1}: sulcal_map
+%     varargin{1}: sulcal_map, can be loaded with read_curv('lh/rh.sulc')
 %
 % output:
 %   th: returns trimesh handle so you can change it
